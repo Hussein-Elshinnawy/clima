@@ -1,5 +1,9 @@
+import 'package:clima/services/networking.dart';
 import 'package:flutter/material.dart';
-import 'package:geolocator/geolocator.dart';
+import 'package:clima/services/location.dart';
+
+
+const apiKey='dc778fa822ed5cc51bef46f5db4a1998';
 
 class LoadingScreen extends StatefulWidget {
   @override
@@ -7,44 +11,29 @@ class LoadingScreen extends StatefulWidget {
 }
 
 class _LoadingScreenState extends State<LoadingScreen> {
-  void getLocation() async {
-    LocationPermission permission = await Geolocator.checkPermission();
-    // print(permission.toString());
-    if (permission == LocationPermission.denied) {
-      print('permission denied 1');
-      permission = await Geolocator.requestPermission();
-      if (permission == LocationPermission.denied) {
-        print('user denied');
-        // Handle the case where the user denied permission
-        // You can show a dialog or display an error message
-        return;
-      }
-    }
-    Position position = await Geolocator.getCurrentPosition();
-    print(position);
+  double? longitdue;
+  double? latitude;
+  void getLocationData() async {
+    Uri url= Uri.parse('https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitdue&appid=$apiKey');
+    Location location= Location();
+    await location.getCurrentLocation();
+    longitdue=location.longitude;
+    latitude=location.latitude;
+    NetworkHelper networkHelper=NetworkHelper(url);
+    var weatherData= networkHelper.getData();
   }
 
-
-  // void getLocation() async {
-  //   Position position = await Geolocator.getCurrentPosition(
-  //       desiredAccuracy: LocationAccuracy.low);
-  //   print(position);
-  // }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getLocationData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Center(
-        child: ElevatedButton(
-          onPressed: () {
-            setState(() {
-              getLocation();
-            });
-            //Get the current location
-          },
-          child: Text('Get Location'),
-        ),
-      ),
+
     );
   }
 }
